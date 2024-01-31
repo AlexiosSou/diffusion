@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
-#include "api.h"
 
 #define NX 8192
 #define NY 8192
@@ -46,8 +45,8 @@ int accCalc(int nt)
         int to = (t+1)%2;
 
 #if 1
-        printf("step %d\n", t);
-        //fflush(0);
+//         printf("step %d\n", t);
+//         //fflush(0);
 #endif
 
 #pragma acc kernels
@@ -77,8 +76,8 @@ int ompCalc(int nt)
         int to = (t+1)%2;
 
 #if 1
-        printf("step %d\n", t);
-        //fflush(0);
+//         printf("step %d\n", t);
+//         //fflush(0);
 #endif
 #pragma omp parallel private(x)
 #pragma omp for    
@@ -103,8 +102,8 @@ int seqCalc(int nt)
     for (t = 0; t < nt; t++) {
         int from = t%2;
         int to = (t+1)%2;
-        printf("step %d\n", t);
-        //fflush(0);
+//         printf("step %d\n", t);
+//         //fflush(0);
         for (y = 1; y < NY-1; y++) {
             for (x = 1; x < NX-1; x++) {
                 data[to][y][x] = 0.2 * (data[from][y][x]
@@ -119,7 +118,7 @@ int seqCalc(int nt)
     return 0;
 }
 
-double speed(int nt, int (*function)(int))
+double time(int nt, int (*function)(int))
 {
     struct timeval t1, t2;
 
@@ -132,37 +131,20 @@ double speed(int nt, int (*function)(int))
     gettimeofday(&t2, NULL);
 
     double us;
-    double gflops;
-    int op_per_point = 5; // 4 add & 1 multiply per point
 
     us = get_elapsed_time(&t1, &t2);
-    gflops = ((double)NX*NY*nt*op_per_point)/us/1000.0;
 
-    return gflops;
+    return us;
 }
 
-double seqSpeed(int nt){
-    return speed(nt, seqCalc);
+double seqTime(int nt){
+    return time(nt, seqCalc);
 }
 
-double ompSpeed(int nt){
-    return speed(nt, ompCalc);
+double ompTime(int nt){
+    return time(nt, ompCalc);
 }
 
-double accSpeed(int nt){
-    return speed(nt, accCalc);
-}
-
-int main(int argc, char *argv[]){
-    int nt = 20; /* number of time steps */
-  
-    if (argc >= 2) { /* if an argument is specified */
-        nt = atoi(argv[1]);
-    }
-    double seq=seqSpeed(nt);
-    double omp=ompSpeed(nt);
-    double acc=accSpeed(nt);
-    printf("Sequential Speed: %.3lf GFlops\n", seq);
-    printf("OMP Speed: %.3lf GFlops\n", omp);
-    printf("ACC Speed: %.3lf GFlops\n", acc);
+double accTime(int nt){
+    return time(nt, accCalc);
 }

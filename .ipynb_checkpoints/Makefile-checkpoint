@@ -1,7 +1,7 @@
 CC = pgcc
-#CFLAGS = -O2 -acc
-CFLAGS = -O2 -acc -Minfo=accel
-LDFLAGS = -acc
+#CFLAGS = -O2 -acc -mp
+CFLAGS = -O2 -acc -mp -Minfo=accel
+LDFLAGS = -acc -mp
 LIBS = 
 
 APP = diffusion
